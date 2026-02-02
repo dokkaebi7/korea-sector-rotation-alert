@@ -1,4 +1,4 @@
-FinanceDataReader
+finance-datareader
 pandas
 requests
 beautifulsoup4
