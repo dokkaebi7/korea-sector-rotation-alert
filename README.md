@@ -14,6 +14,7 @@ ETF를 통해 섹터별 수급(거래대금 증가율) + 상대강도(RS) + 뉴�
 - **데이터 소스**: FinanceDataReader (KRX 기반 안정적 데이터)
 
 ## 설치 방법
+
 ```bash
 # 필요한 패키지 설치
 pip install FinanceDataReader pandas requests beautifulsoup4
