@@ -12,10 +12,10 @@ ETF를 통해 섹터별 수급(거래대금 증가율) + 상대강도(RS) + 뉴�
 - **내러티브 체크**: 네이버 뉴스 최신 헤드라인 상위 3개 스크래핑
 - **정렬 & 상태 표시**: 수급 증가율 기준 내림차순 + 🔥/🟡/💤 이모지 신호
 - **데이터 소스**: FinanceDataReader (KRX 기반 안정적 데이터)
-
+-config.yaml로 설정 커스터마이징 가능
 ## 설치 방법
 
 ```bash
 # 필요한 패키지 설치
 pip install FinanceDataReader pandas requests beautifulsoup4
-config.yaml로 설정 커스터마이징 가능
+
