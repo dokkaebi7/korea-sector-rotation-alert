@@ -1,0 +1,5 @@
+FinanceDataReader
+pandas
+requests
+beautifulsoup4
+pyyaml          # yaml 파일 읽기용
