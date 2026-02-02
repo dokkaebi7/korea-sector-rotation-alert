@@ -18,3 +18,4 @@ ETF를 통해 섹터별 수급(거래대금 증가율) + 상대강도(RS) + 뉴�
 ```bash
 # 필요한 패키지 설치
 pip install FinanceDataReader pandas requests beautifulsoup4
+config.yaml로 설정 커스터마이징 가능
