@@ -97,3 +97,8 @@ output:
   # 뉴스
   show_news: true               # 뉴스 표시 여부
   max_news: 3                   # 최대 뉴스 개수
+
+# 텔레그램 알림 설정
+alerts:
+  enable: true                  # 알림 기능 사용 여부
+  rotation_score_threshold: 6   # 알림 발생 점수 (6점 이상일 때만 알림)
