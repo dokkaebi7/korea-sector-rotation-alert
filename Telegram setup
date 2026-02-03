@@ -1,0 +1,106 @@
+# 텔레그램 알림 설정 가이드
+
+## 📱 텔레그램 봇 만들기
+
+### 1단계: 봇 생성
+1. 텔레그램에서 `@BotFather` 검색
+2. `/newbot` 명령 입력
+3. 봇 이름 입력 (예: Korea Sector Alert)
+4. 봇 사용자명 입력 (예: korea_sector_alert_bot)
+5. **봇 토큰** 복사 (예: 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz)
+
+### 2단계: Chat ID 확인
+1. 텔레그램에서 `@userinfobot` 검색
+2. `/start` 명령 입력
+3. **Your ID** 숫자 복사 (예: 123456789)
+
+### 3단계: .env 파일 설정
+`.env` 파일에 다음 내용 추가:
+
+```
+KRX_API_KEY=your_krx_api_key_here
+TELEGRAM_BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
+TELEGRAM_CHAT_ID=123456789
+```
+
+### 4단계: config.yaml 확인
+`config.yaml`에서 알림 설정 확인:
+
+```yaml
+alerts:
+  enable: true                  # 알림 활성화
+  rotation_score_threshold: 6   # 6점 이상일 때만 알림
+```
+
+## 🔔 알림 예시
+
+순환매 점수 6점 이상인 섹터가 발견되면 다음과 같은 메시지가 전송됩니다:
+
+```
+🚀 섹터 순환매 신호 감지
+📅 2026-02-03
+━━━━━━━━━━━━━━━━━━━━
+
+[바이오] 7/8점 ⭐
+티커: 244580
+📊 장기 -18.3% | 단기 +6.2%
+💰 거래량 1.8배 | 수급 +25.3%
+📰 바이오 업종, 신약 개발 호재로 반등 시작
+
+[조선] 8/8점 ⭐
+티커: 394670
+📊 장기 -22.1% | 단기 +9.8%
+💰 거래량 2.3배 | 수급 +45.6%
+📰 조선업 수주 증가, ETF 자금 유입
+
+━━━━━━━━━━━━━━━━━━━━
+총 2개 섹터 발견
+```
+
+## ⚙️ 알림 설정 커스터마이징
+
+### 알림 점수 조정
+더 많은/적은 알림을 받고 싶다면:
+
+```yaml
+alerts:
+  rotation_score_threshold: 5   # 5점 이상 (더 많은 알림)
+  rotation_score_threshold: 7   # 7점 이상 (덜 받기)
+```
+
+### 알림 끄기
+```yaml
+alerts:
+  enable: false   # 알림 비활성화
+```
+
+## 🔒 보안 주의사항
+
+1. **.env 파일 보호**: 절대 GitHub에 올리지 마세요
+2. **봇 토큰 관리**: 유출 시 @BotFather에서 재발급
+3. **Chat ID**: 본인 ID만 사용하세요
+
+## ❓ 문제 해결
+
+### 알림이 안 와요
+1. `.env` 파일의 토큰과 Chat ID 확인
+2. config.yaml의 `enable: true` 확인
+3. 봇과의 대화창에서 `/start` 한 번 실행
+4. 콘솔에 "✓ 텔레그램 알림 전송 완료" 메시지 확인
+
+### 토큰이 틀렸어요
+```
+✗ 텔레그램 알림 실패: 401
+```
+→ 봇 토큰을 다시 확인하세요
+
+### Chat ID가 틀렸어요
+```
+✗ 텔레그램 알림 실패: 400
+```
+→ Chat ID를 다시 확인하세요
+
+## 📞 추가 지원
+
+텔레그램 봇 API 공식 문서:
+https://core.telegram.org/bots/api
