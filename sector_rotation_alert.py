@@ -1,10 +1,11 @@
 """
-KRX OPEN API 연동 버전 - 주식 섹터 순환매 분석 봇 (v2.0)
+KRX OPEN API 연동 버전 - 주식 섹터 순환매 분석 봇 (v2.1)
 개선 사항:
 - 순환매 초기 신호 감지 (바닥 반등 패턴)
 - 다중 지표 통합 분석 (거래대금, RS, 모멘텀)
 - 섹터별 순환매 점수 시스템
 - 전체 35개 섹터 커버리지
+- 텔레그램 알림 기능 추가
 """
 
 import requests
@@ -21,6 +22,10 @@ load_dotenv()
 KRX_API_KEY = os.getenv('KRX_API_KEY')
 if not KRX_API_KEY:
     raise ValueError("KRX_API_KEY가 .env 파일에 없습니다.")
+
+# 텔레그램 설정
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
 
 # config.yaml 불러오기
 with open('config.yaml', 'r', encoding='utf-8') as f:
@@ -60,16 +65,53 @@ min_rotation_score = output_config.get('min_rotation_score', 4)
 show_news = output_config.get('show_news', True)
 max_news = output_config.get('max_news', 3)
 
+# 알림 설정
+alerts_config = config.get('alerts', {})
+enable_alerts = alerts_config.get('enable', False)
+rotation_score_threshold = alerts_config.get('rotation_score_threshold', 6)
+
 # 날짜 설정
 end_date_dt = datetime.date.today() - datetime.timedelta(days=1)  # 어제
 start_date_dt = end_date_dt - datetime.timedelta(days=period_days)
 
 print(f"{'='*80}")
-print(f"KRX 섹터 순환매 분석 시스템 v2.0")
+print(f"KRX 섹터 순환매 분석 시스템 v2.1")
 print(f"{'='*80}")
 print(f"데이터 기간: {start_date_dt} ~ {end_date_dt}")
 print(f"분석 섹터: {len(sectors)}개")
+if enable_alerts and TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+    print(f"텔레그램 알림: ✓ 활성화 (점수 {rotation_score_threshold}점 이상)")
+else:
+    print(f"텔레그램 알림: ✗ 비활성화")
 print(f"{'='*80}\n")
+
+
+def send_telegram_message(message):
+    """
+    텔레그램 메시지 전송
+    """
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return False
+    
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    
+    payload = {
+        'chat_id': TELEGRAM_CHAT_ID,
+        'text': message,
+        'parse_mode': 'HTML'
+    }
+    
+    try:
+        response = requests.post(url, json=payload, timeout=10)
+        if response.status_code == 200:
+            print("  ✓ 텔레그램 알림 전송 완료")
+            return True
+        else:
+            print(f"  ✗ 텔레그램 알림 실패: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"  ✗ 텔레그램 알림 오류: {e}")
+        return False
 
 
 def get_krx_etf_daily_single(base_date):
@@ -350,6 +392,33 @@ df_summary = df_summary.sort_values(by='순환매점수', ascending=False)
 
 if show_top_n:
     df_summary = df_summary.head(show_top_n)
+
+# 텔레그램 알림 전송
+if enable_alerts and TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+    high_score_sectors = df_summary[df_summary['순환매점수'] >= rotation_score_threshold]
+    
+    if len(high_score_sectors) > 0:
+        print(f"\n텔레그램 알림 전송 중...")
+        
+        telegram_msg = f"🚀 <b>섹터 순환매 신호 감지</b>\n"
+        telegram_msg += f"📅 {end_date_dt.strftime('%Y-%m-%d')}\n"
+        telegram_msg += f"━━━━━━━━━━━━━━━━━━━━\n\n"
+        
+        for idx, row in high_score_sectors.iterrows():
+            telegram_msg += f"<b>[{row['섹터']}]</b> {row['순환매점수']}/8점 ⭐\n"
+            telegram_msg += f"티커: {row['종목코드']}\n"
+            telegram_msg += f"📊 장기 {row['장기수익률']:+.1f}% | 단기 {row['단기수익률']:+.1f}%\n"
+            telegram_msg += f"💰 거래량 {row['거래량배수']:.1f}배 | 수급 {row['수급증가율']:+.1f}%\n"
+            
+            if row['뉴스'] and row['뉴스'][0] != "뉴스 없음":
+                telegram_msg += f"📰 {row['뉴스'][0]}\n"
+            
+            telegram_msg += f"\n"
+        
+        telegram_msg += f"━━━━━━━━━━━━━━━━━━━━\n"
+        telegram_msg += f"총 {len(high_score_sectors)}개 섹터 발견"
+        
+        send_telegram_message(telegram_msg)
 
 # 결과 출력
 print(f"\n{'='*80}")
